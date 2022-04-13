@@ -31,8 +31,8 @@ The process might take a while, and current progress is displayed
 
 ## Retrieving the scraped data
 The script will automatically create two folders:
-ScrapedData for the csv files
-ScrapedImages the extracted images
+* ScrapedData for the csv files
+* ScrapedImages the extracted images
 
 ## Author
 Vendrisse Nicolas
