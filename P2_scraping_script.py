@@ -5,6 +5,7 @@ import os
 
 
 # Initiate url and retrieving site data
+counter_ = 0
 url = "http://books.toscrape.com/index.html"
 data_dir = ".\ScrapedData"
 image_dir = ".\ScrapedImages"
@@ -57,10 +58,12 @@ for category_url in categories_urls[1:]:
                 products_urls.append(link["href"].replace(
                     "../../../", "http://books.toscrape.com/catalogue/"))
         for url in products_urls:
+            counter_ += 1
             urls_count = len(products_urls)
             current_progress = products_urls.index(url)
             product_request = requests.get(url)
             if product_request.ok:
+                # extracting the data
                 product_soup = BeautifulSoup(
                     product_request.content, "html.parser")
                 product_title = product_soup.find("h1").text  # title
@@ -72,26 +75,24 @@ for category_url in categories_urls[1:]:
                 number_available = raw_product_informations[5].text.replace(
                     'In stock (', '').replace('available)', '')
                 description = product_soup.find(
-                    "article").find_all("p")[3].text
+                    "article").find_all("p")[3].text.strip()
                 raw_product_rating = product_soup.find(
                     "p", class_="star-rating")
                 product_rating = "{} / 5".format(
                     converter_dict[raw_product_rating["class"][1]])
-                images_urls = []
                 raw_image_url = product_soup.find(
                     "div", class_="item active").find_next("img")
                 image_url = raw_image_url["src"].replace(
                     "../..", "http://books.toscrape.com")
-                images_urls.append(image_url)
                 data_table = [url, upc, product_title, price_incl_tax, price_excl_tax,
                               number_available, description, category_name, product_rating, image_url]
                 for i in range(0, len(data_table)):
                     data_table[i] = data_table[i].replace(";", ":")
                 with open("{}\\{}.csv".format(data_dir, category_name), "a", encoding="utf-8") as csv_file:
                     csv_file.write(";".join(data_table)+"\n")
-                for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|"]:
+                for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|", "*"]:
                     product_title = product_title.replace(sp_char, " ")
-                product_title=product_title.replace(",","")
+                product_title = product_title.replace(",", "")
                 if len("{}\{}.jpg".format(image_dir, product_title)) >= 255:
                     product_title = product_title[:240]
                 urllib.request.urlretrieve(
