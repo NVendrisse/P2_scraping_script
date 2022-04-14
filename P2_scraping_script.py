@@ -94,7 +94,6 @@ for category_url in categories_urls[1:]:
                 product_title=product_title.replace(",","")
                 if len("{}\{}.jpg".format(image_dir, product_title)) >= 255:
                     product_title = product_title[:240]
-                print(product_title)
                 urllib.request.urlretrieve(
                     image_url, "{}\{}.jpg".format(image_dir, product_title))
             print("{}/{}".format(current_progress+1, urls_count), end="\r")
