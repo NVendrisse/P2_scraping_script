@@ -7,8 +7,8 @@ import os
 # Initiate url and retrieving site data
 counter_ = 0
 url = "http://books.toscrape.com/index.html"
-data_dir = ".\ScrapedData"
-image_dir = ".\ScrapedImages"
+data_dir = "ScrapedData"
+image_dir = "ScrapedImages"
 index_request = requests.get(url)
 csv_column_title = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
                     "number_available", "product_description", "category", "review_rating", "image_url"]
@@ -92,10 +92,11 @@ for category_url in categories_urls[1:]:
                     csv_file.write(";".join(data_table)+"\n")
                 for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|", "*"]:
                     product_title = product_title.replace(sp_char, " ")
-                product_title = product_title.replace(",", "")
-                if len("{}\{}.jpg".format(image_dir, product_title)) >= 255:
-                    product_title = product_title[:240]
+                save_path = "{}\{}\{}".format(
+                    os.getcwd(), image_dir, product_title)
+                if len(save_path) >= 255:
+                    save_path = save_path[:250]
                 urllib.request.urlretrieve(
-                    image_url, "{}\{}.jpg".format(image_dir, product_title))
+                    image_url, "{}.jpg".format(save_path))
             print("{}/{}".format(current_progress+1, urls_count), end="\r")
         print()
