@@ -1,3 +1,4 @@
+from genericpath import exists
 import requests
 from bs4 import BeautifulSoup
 import urllib.request
@@ -84,19 +85,24 @@ for category_url in categories_urls[1:]:
                     "div", class_="item active").find_next("img")
                 image_url = raw_image_url["src"].replace(
                     "../..", "http://books.toscrape.com")
+
                 data_table = [url, upc, product_title, price_incl_tax, price_excl_tax,
                               number_available, description, category_name, product_rating, image_url]
                 for i in range(0, len(data_table)):
                     data_table[i] = data_table[i].replace(";", ":")
                 with open("{}\\{}.csv".format(data_dir, category_name), "a", encoding="utf-8") as csv_file:
                     csv_file.write(";".join(data_table)+"\n")
+
                 for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|", "*"]:
                     product_title = product_title.replace(sp_char, " ")
                 save_path = "{}\{}\{}".format(
                     os.getcwd(), image_dir, product_title)
                 if len(save_path) >= 255:
                     save_path = save_path[:250]
+                if exists(save_path+".jpg"):
+                    save_path+=" (1)"
                 urllib.request.urlretrieve(
                     image_url, "{}.jpg".format(save_path))
+
             print("{}/{}".format(current_progress+1, urls_count), end="\r")
         print()
