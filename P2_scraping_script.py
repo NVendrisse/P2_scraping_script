@@ -8,7 +8,7 @@ import os
 
 
 # Initiate global variable
-file_encoding="ansi"
+file_encoding = "ansi"
 url = "http://books.toscrape.com/index.html"
 data_dir = "ScrapedData"
 image_dir = "ScrapedImages"
@@ -16,12 +16,12 @@ index_request = requests.get(url)
 csv_column_title = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
                     "number_available", "product_description", "category", "review_rating", "image_url"]
 converter_dict = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
-#Testing if the saving directories already exist, deleting them if True 
+# Testing if the saving directories already exist, deleting them if True
 if exists(data_dir):
     shutil.rmtree(data_dir)
 if exists(image_dir):
     shutil.rmtree(image_dir)
-#Creating directories for saving data
+# Creating directories for saving data
 os.makedirs(data_dir, exist_ok=False)
 os.makedirs(image_dir, exist_ok=False)
 # Collecting all categories names and links
@@ -39,7 +39,8 @@ if index_request.ok:
 # Collecting all products urls
 for category_url in categories_urls[1:]:
     category_name = categories_names[categories_urls.index(category_url)]
-    with open("{}\\{}.csv".format(data_dir, category_name), "w", encoding=file_encoding) as csv_file:
+    # Creating the csv file for the category
+    with open("{}\\{}.csv".format(data_dir, category_name), "w", encoding=file_encoding, errors="ignore") as csv_file:
         csv_file.write(";".join(csv_column_title)+"\n")
     print("\tScraping category <{}>".format(category_name))
     category_request = requests.get(category_url)
@@ -86,7 +87,7 @@ for category_url in categories_urls[1:]:
                     "article").find_all("p")[3].text.strip()
                 raw_product_rating = product_soup.find(
                     "p", class_="star-rating")
-                product_rating = r"{} / 5".format(
+                product_rating = "{} out of 5".format(
                     converter_dict[raw_product_rating["class"][1]])
                 raw_image_url = product_soup.find(
                     "div", class_="item active").find_next("img")
@@ -96,7 +97,7 @@ for category_url in categories_urls[1:]:
                               number_available, description, category_name, product_rating, image_url]
                 for i in range(0, len(data_table)):
                     data_table[i] = data_table[i].replace(";", ":")
-                with open("{}\\{}.csv".format(data_dir, category_name), "a", encoding=file_encoding) as csv_file:
+                with open("{}\\{}.csv".format(data_dir, category_name), "a", encoding=file_encoding, errors="ignore") as csv_file:
                     csv_file.write(";".join(data_table)+"\n")
                 for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|", "*"]:
                     product_title = product_title.replace(sp_char, " ")
