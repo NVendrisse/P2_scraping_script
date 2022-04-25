@@ -26,7 +26,6 @@ os.makedirs(data_dir, exist_ok=False)
 os.makedirs(image_dir, exist_ok=False)
 # Collecting all categories names and links
 if index_request.ok:
-    print("Extracting {} data".format(url))
     site_soup = BeautifulSoup(index_request.content, "html.parser")
     categories_links = site_soup.find(
         "div", class_="side_categories").find_all("a")
@@ -48,6 +47,7 @@ for category_url in categories_urls[1:]:
         category_soup = BeautifulSoup(category_request.content, "html.parser")
         products_links = category_soup.find("ol", class_="row").find_all("a")
         pager_item = category_soup.find("ul", class_="pager")
+        #Testing section for multipage
         if pager_item != None:
             next_page_url = pager_item.find("li", class_="next")
             while next_page_url != None:
@@ -70,6 +70,7 @@ for category_url in categories_urls[1:]:
         for url in products_urls:
             urls_count = len(products_urls)
             current_progress = products_urls.index(url)
+            progress_percent = int(((current_progress+1)/urls_count)*100)
             product_request = requests.get(url)
             if product_request.ok:
                 # extracting the data
@@ -93,22 +94,27 @@ for category_url in categories_urls[1:]:
                     "div", class_="item active").find_next("img")
                 image_url = raw_image_url["src"].replace(
                     "../..", "http://books.toscrape.com")
+                #Writing the data in csv file
                 data_table = [url, upc, product_title, price_incl_tax, price_excl_tax,
                               number_available, description, category_name, product_rating, image_url]
                 for i in range(0, len(data_table)):
                     data_table[i] = data_table[i].replace(";", ":")
                 with open("{}\\{}.csv".format(data_dir, category_name), "a", encoding=file_encoding, errors="ignore") as csv_file:
                     csv_file.write(";".join(data_table)+"\n")
+                #Formating product title to use as image filename
                 for sp_char in ["\\", "/", ":", "?", "\"", "<", ">", "|", "*"]:
                     product_title = product_title.replace(sp_char, " ")
+                #creating save path
                 save_path = "{}\{}\{}".format(
                     os.getcwd(), image_dir, product_title)
+                #Formating save path 
                 if len(save_path) >= 255:
                     save_path = save_path[:250]
                 if exists(save_path+".jpg"):
                     save_path += " (1)"
+                #Downloading image
                 urllib.request.urlretrieve(
                     image_url, "{}.jpg".format(save_path))
 
-            print("{}/{}".format(current_progress+1, urls_count), end="\r")
+            print("Retrieving {} product{} : {}%".format(urls_count,"s" if urls_count>1 else "",progress_percent), end="\r")
         print()
